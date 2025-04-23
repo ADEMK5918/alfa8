@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALFAmedya | Gizli Giriş</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #ff4747;
+      --bg: #0f0f0f;
+      --input-bg: #1f1f1f;
+      --text: #fff;
+      --muted: #aaa;
+      --accent: #28a745;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden; }
+    @media (max-height: 700px) {
+      .container { overflow-y: auto; max-height: 90vh; }
+    }
+    .container { position: relative; z-index: 1; background-color: #161616; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
+    .logo { font-size: 3em; font-weight: bold; letter-spacing: 10px; background: linear-gradient(90deg, #ff416c, #ff4b2b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; }
+    input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: none; border-radius: 10px; background: var(--input-bg); color: white; font-size: 1em; }
+    .checkbox-container { display: flex; align-items: center; background: #222; padding: 10px; border-radius: 10px; margin-bottom: 15px; color: white; cursor: pointer; }
+    .checkbox-container input[type="checkbox"] { accent-color: var(--primary); width: 18px; height: 18px; }
+    .checkbox-container label { margin-left: 10px; font-size: 0.95em; }
+    button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; font-size: 1em; color: white; cursor: pointer; transition: background 0.3s; margin-bottom: 10px; }
+    button:hover { background: #ff1f1f; }
+    .secondary-btn { background: #444; }
+    .message { margin-top: 10px; color: var(--muted); font-size: 0.9em; }
+    .hidden { display: none; }
+    #supportForm { display: none; flex-direction: column; margin-top: 30px; }
+    #supportResult { text-align: center; margin-top: 10px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">ALFA8</div>
+    <input type="password" id="password" placeholder="Şifreyi girin" onkeydown="checkEnter(event)">
+    <div class="checkbox-container">
+      <input type="checkbox" id="showPassword" onclick="togglePassword()">
+      <label for="showPassword">Şifreyi Göster</label>
+    </div>
+    <button onclick="checkPassword()"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
+    <button class="secondary-btn" onclick="forgotPassword()"><i class="fas fa-unlock-alt"></i> Şifremi Unuttum</button>
+    <button class="secondary-btn" onclick="toggleSupportForm()"><i class="fas fa-headset"></i> Destek Formu</button>
+    <div id="result" class="message"></div>
+    <div id="adminPanel" class="hidden">
+      <h3>Yönetim Paneli</h3>
+      <input type="text" id="newPassword" placeholder="Yeni Şifre">
+      <input type="text" id="newRedirect" placeholder="Yönlendirme URL'si">
+      <button onclick="addUser()"><i class="fas fa-user-plus"></i> Kullanıcı Ekle</button>
+      <div id="userList"></div>
+    </div>
+    <div id="supportForm">
+      <h4>Destek Formu</h4>
+      <input type="text" id="supportName" placeholder="Adınız">
+      <input type="email" id="supportEmail" placeholder="E-posta">
+      <textarea id="supportMessage" placeholder="Mesajınız" rows="4"></textarea>
+      <button onclick="submitSupport()"><i class="fas fa-paper-plane"></i> Gönder</button>
+      <div id="supportResult"></div>
+    </div>
+  </div>
+<script>
+const SERVER_URL = "https://alfamedya-server.onrender.com";
+const users = {};
+function loadUsers() {
+  fetch(`${SERVER_URL}/users`)
+    .then(res => res.json())
+    .then(data => {
+      Object.assign(users, data);
+      renderUserList();
+    });
+}
+function checkPassword() {
+  const input = document.getElementById('password').value.trim();
+  const result = document.getElementById('result');
+  result.textContent = ""; result.style.color = "var(--muted)";
+  if (input === "ademkral") {
+    window.location.href = "https://drive.google.com/drive/folders/1OwzXLnfCz1QHv02uv-t0kd3OoG54rp8u";
+  } else if (input === "ademkraldır04") {
+    document.getElementById('adminPanel').classList.remove('hidden');
+    result.textContent = "Yönetim paneline giriş yapıldı.";
+  } else if (users[input]) {
+    window.location.href = users[input].redirect;
+  } else {
+    result.textContent = "Hatalı şifre. Lütfen tekrar deneyin.";
+    result.style.color = "#ff7070";
+  }
+}
+function checkEnter(e) { if (e.key === "Enter") checkPassword(); }
+function togglePassword() {
+  const pw = document.getElementById('password');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+}
+function forgotPassword() {
+  alert("Lütfen destek için iletişime geçin: destek@alfamedya.com");
+}
+function toggleSupportForm() {
+  const form = document.getElementById('supportForm');
+  form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
+}
+function addUser() {
+  const newPassword = document.getElementById('newPassword').value.trim();
+  const newRedirect = document.getElementById('newRedirect').value.trim();
+  if (newPassword && newRedirect) {
+    fetch(`${SERVER_URL}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: newPassword, redirect: newRedirect })
+    }).then(() => {
+      users[newPassword] = { redirect: newRedirect };
+      renderUserList();
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newRedirect').value = '';
+    });
+  } else {
+    alert("Lütfen tüm alanları doldurun.");
+  }
+}
+function renderUserList() {
+  const userList = document.getElementById('userList');
+  userList.innerHTML = '';
+  for (const [password, data] of Object.entries(users)) {
+    const entry = document.createElement('div');
+    entry.className = 'user-entry';
+    const passwordInput = document.createElement('input');
+    passwordInput.value = password; passwordInput.readOnly = true;
+    passwordInput.style.marginBottom = '10px';
+    const redirectInput = document.createElement('input');
+    redirectInput.value = data.redirect;
+    const updateBtn = document.createElement('button');
+    updateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Güncelle';
+    updateBtn.onclick = () => {
+      users[password].redirect = redirectInput.value;
+      fetch(`${SERVER_URL}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: password, redirect: redirectInput.value })
+      });
+    };
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Sil';
+    deleteBtn.onclick = () => {
+      fetch(`${SERVER_URL}/users/${password}`, { method: 'DELETE' })
+        .then(() => { delete users[password]; renderUserList(); });
+    };
+    entry.appendChild(passwordInput);
+    entry.appendChild(redirectInput);
+    entry.appendChild(updateBtn);
+    entry.appendChild(deleteBtn);
+    userList.appendChild(entry);
+  }
+}
+function submitSupport() {
+  const name = document.getElementById('supportName').value.trim();
+  const email = document.getElementById('supportEmail').value.trim();
+  const message = document.getElementById('supportMessage').value.trim();
+  const result = document.getElementById('supportResult');
+  if (!name || !email || !message) {
+    result.textContent = "Lütfen tüm alanları doldurun.";
+    result.style.color = "orange";
+    return;
+  }
+  result.textContent = "Mesajınız gönderildi. Teşekkür ederiz!";
+  result.style.color = "lightgreen";
+  document.getElementById('supportName').value = '';
+  document.getElementById('supportEmail').value = '';
+  document.getElementById('supportMessage').value = '';
+}
+window.onload = loadUsers;
+</script>
+</body>
+</html>
