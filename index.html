@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bakım Modu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1e1e2f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      font-size: 1.2em;
+      color: #ccc;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-top: 2em;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9em;
+      color: #777;
+    }
+
+    .footer a {
+      color: #777;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sitemiz Şu Anda Bakımda</h1>
+  <p>Geliştirme çalışmaları devam ediyor. En kısa sürede tekrar yayında olacağız.</p>
+  <div class="loader"></div>
+  <div class="footer">
+    © <a href="https://www.instagram.com/adem79kaya?igsh=cjV4dTVpNmRoOGxq" target="_blank">alfa 8</a>
+  </div>
+</body>
+</html>
