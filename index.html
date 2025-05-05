@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Site Bakımda</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    .countdown {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .countdown div {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 10px;
+      min-width: 70px;
+    }
+    .countdown span {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .label {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      opacity: 0.8;
+    }
+    .contact {
+      font-size: 1rem;
+      background: rgba(255,255,255,0.1);
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+      .countdown span {
+        font-size: 1.5rem;
+      }
+      .countdown div {
+        padding: 8px 12px;
+        min-width: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Bakım Modundayız</h1>
+  <p>Web sitemiz kısa süreliğine bakımda. Yakında yeniden hizmetinizde olacağız.</p>
+
+  <div class="countdown">
+    <div><span id="days">0</span><div class="label">Gün</div></div>
+    <div><span id="hours">0</span><div class="label">Saat</div></div>
+    <div><span id="minutes">0</span><div class="label">Dakika</div></div>
+    <div><span id="seconds">0</span><div class="label">Saniye</div></div>
+  </div>
+
+  <div class="contact">İletişim: ademkaya1932@gmail.com</div>
+
+  <script>
+    // Sayfa yüklendiğinde 1 hafta sonrası UTC olarak ayarlanır
+    const now = new Date();
+    const targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 7, now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()));
+
+    function updateCountdown() {
+      const currentTime = new Date();
+      const diff = targetDate - currentTime;
+
+      if (diff <= 0) {
+        document.getElementById('days').textContent = "0";
+        document.getElementById('hours').textContent = "0";
+        document.getElementById('minutes').textContent = "0";
+        document.getElementById('seconds').textContent = "0";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = hours;
+      document.getElementById('minutes').textContent = minutes;
+      document.getElementById('seconds').textContent = seconds;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>
