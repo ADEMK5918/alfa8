@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dijital Hatıra - 5 Temmuz 2025</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      color: #bbb;
+    }
+
+    #countup {
+      font-family: 'Courier New', monospace;
+      font-size: 2.2rem;
+      color: #90caf9;
+      padding: 0.8rem 2rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-bottom: 2.5rem;
+      border: 2px solid #ffeb3b; /* sarı kenarlık eklendi */
+    }
+
+    textarea {
+      width: 90vw;
+      max-width: 600px;
+      height: 150px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      padding: 1rem;
+      resize: vertical;
+      background: #222;
+      color: #eee;
+    }
+
+    .warning {
+      font-size: 0.95rem;
+      color: #ff5252;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      background: #00bfa5;
+      border: none;
+      border-radius: 6px;
+      color: #121212;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
+      #countup { font-size: 1.7rem; }
+      textarea { font-size: 1rem; height: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dijital Hatıra</h1>
+  <p><em>5 Temmuz 2025'ten bu yana geçen zaman:</em></p>
+  <div id="countup">Yükleniyor...</div>
+
+  <h2>İletişim Yazısı</h2>
+
+  <textarea id="note" placeholder="İletişim notunu buraya yaz..."></textarea>
+  <p class="warning">Not yazdığınız her şey tüm kullanıcılar tarafından görülebilir.</p>
+  <button id="saveBtn">Yazıyı Kaydet</button>
+
+  <footer>© 2025 by Adem Kaya</footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDV6eg5E3TK5upgcxQNkXD24iyisbHqmxk",
+      authDomain: "alfa7devam.firebaseapp.com",
+      projectId: "alfa7devam",
+      storageBucket: "alfa7devam.firebasestorage.app",
+      messagingSenderId: "271162663936",
+      appId: "1:271162663936:web:ec806de8be78a986d664e5",
+      measurementId: "G-NYHQP3BDD3",
+      databaseURL: "https://alfa7devam-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const noteRef = ref(db, 'sharedNote');
+
+    const noteEl = document.getElementById('note');
+    const saveBtn = document.getElementById('saveBtn');
+
+    onValue(noteRef, (snapshot) => {
+      const val = snapshot.val();
+      if (val !== null && val !== noteEl.value) {
+        noteEl.value = val;
+      }
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const val = noteEl.value.trim();
+      set(noteRef, val)
+        .then(() => alert('✅ Yazı kaydedildi!'))
+        .catch(err => alert('❌ Hata: ' + err.message));
+    });
+
+    const startDate = new Date('2025-07-05T00:00:00'); // güncellendi
+    function pad(n) { return n.toString().padStart(2, '0'); }
+
+    function updateCountUp() {
+      const now = new Date();
+      let diff = Math.floor((now - startDate) / 1000);
+
+      const days = Math.floor(diff / 86400);
+      diff %= 86400;
+      const hours = Math.floor(diff / 3600);
+      diff %= 3600;
+      const minutes = Math.floor(diff / 60);
+      const seconds = diff % 60;
+
+      document.getElementById('countup').textContent =
+        `${days} gün ${pad(hours)} saat ${pad(minutes)} dakika ${pad(seconds)} saniye`;
+    }
+
+    updateCountUp();
+    setInterval(updateCountUp, 1000);
+  </script>
+
+</body>
+</html>
