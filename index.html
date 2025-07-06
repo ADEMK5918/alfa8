@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dijital Hatıra - 19 Eylül 2016</title>
+  <title>Dijital Hatıra - 5 Temmuz 2025</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,6 +40,7 @@
       background: rgba(255,255,255,0.05);
       border-radius: 10px;
       margin-bottom: 2.5rem;
+      border: 2px solid #ffeb3b; /* sarı kenarlık eklendi */
     }
 
     textarea {
@@ -90,13 +91,13 @@
 <body>
 
   <h1>Dijital Hatıra</h1>
-  <p><em>19 Eylül 2016'dan bu yana geçen zaman:</em></p>
+  <p><em>5 Temmuz 2025'ten bu yana geçen zaman:</em></p>
   <div id="countup">Yükleniyor...</div>
 
   <h2>İletişim Yazısı</h2>
 
   <textarea id="note" placeholder="İletişim notunu buraya yaz..."></textarea>
-  <p class="warning">Not: yazdığınız her şey tüm kullanıcılar tarafından görülebilir.</p>
+  <p class="warning">Not yazdığınız her şey tüm kullanıcılar tarafından görülebilir.</p>
   <button id="saveBtn">Yazıyı Kaydet</button>
 
   <footer>© 2025 by Adem Kaya</footer>
@@ -137,7 +138,7 @@
         .catch(err => alert('❌ Hata: ' + err.message));
     });
 
-    const startDate = new Date('2016-09-19T00:00:00');
+    const startDate = new Date('2025-07-05T00:00:00'); // güncellendi
     function pad(n) { return n.toString().padStart(2, '0'); }
 
     function updateCountUp() {
