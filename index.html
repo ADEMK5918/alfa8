@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mersin Üniversitesi Dijital Alan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #f2f2f2;
+      color: #222;
+    }
+
+    header {
+      background-color: #004d40;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #004d40;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .file-list {
+      margin-top: 20px;
+    }
+
+    .file-item {
+      padding: 10px;
+      background: #e0f2f1;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .edit-btn {
+      margin-top: 5px;
+      background: #ffa726;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Mersin Üniversitesi Dijital Paylaşım Alanı</h2>
+  </header>
+
+  <div class="container" id="authContainer">
+    <h1>Giriş Yap</h1>
+    <button id="googleLogin">Google ile Giriş Yap</button>
+    <button onclick="resetPassword()">Şifremi Unuttum</button>
+  </div>
+
+  <div class="container hidden" id="uploadContainer">
+    <h1>Not & Dosya Paylaş</h1>
+    <p id="uploadCount"></p>
+    <input type="text" id="noteTitle" placeholder="Not başlığı" />
+    <textarea id="noteContent" rows="4" placeholder="Not içeriği"></textarea>
+    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf" />
+    <button onclick="uploadNote()">Kaydet & Paylaş</button>
+
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAmHo4HZrdyf1DLlnoAqUyo9M6sVWhvxk",
+      authDomain: "alfa7-devam.firebaseapp.com",
+      projectId: "alfa7-devam",
+      storageBucket: "alfa7-devam.appspot.com",
+      messagingSenderId: "764460755142",
+      appId: "1:764460755142:web:4881db4d663d2fb1428fc7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const storage = getStorage(app);
+
+    let currentUID = null;
+
+    document.getElementById('googleLogin').onclick = async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        currentUID = result.user.uid;
+      } catch (error) {
+        alert("Giriş başarısız: " + error.message);
+      }
+    };
+
+    window.resetPassword = () => {
+      const email = prompt("Şifre sıfırlama bağlantısı için e-posta adresinizi girin:");
+      if (email) {
+        sendPasswordResetEmail(auth, email)
+          .then(() => alert("E-posta gönderildi."))
+          .catch((error) => alert("Hata: " + error.message));
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUID = user.uid;
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('uploadContainer').classList.remove('hidden');
+        loadUserFiles();
+      }
+    });
+
+    window.uploadNote = async () => {
+      const file = document.getElementById('fileInput').files[0];
+      const title = document.getElementById('noteTitle').value;
+      const content = document.getElementById('noteContent').value;
+
+      if (!file) return alert("Dosya seçiniz.");
+
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        return alert("Sadece .jpg, .png ve .pdf yükleyebilirsiniz.");
+      }
+
+      const fileRef = ref(storage, `users/${currentUID}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.innerHTML = `<strong contenteditable="true">${title}</strong><br><span contenteditable="true">${content}</span><br><a href="${url}" target="_blank">Dosyayı Görüntüle</a><br><button onclick="deleteFile('${file.name}', this)">Sil</button>`;
+      document.getElementById('fileList').appendChild(div);
+
+      document.getElementById('noteTitle').value = '';
+      document.getElementById('noteContent').value = '';
+      document.getElementById('fileInput').value = '';
+
+      updateUploadCount();
+    };
+
+    window.deleteFile = async (fileName, btn) => {
+      const fileRef = ref(storage, `users/${currentUID}/${fileName}`);
+      await deleteObject(fileRef);
+      btn.parentElement.remove();
+      updateUploadCount();
+    };
+
+    async function loadUserFiles() {
+      const listRef = ref(storage, `users/${currentUID}`);
+      const result = await listAll(listRef);
+      document.getElementById('fileList').innerHTML = '';
+      for (const itemRef of result.items) {
+        const url = await getDownloadURL(itemRef);
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `<strong contenteditable="true">${itemRef.name}</strong><br><a href="${url}" target="_blank">Dosyayı Görüntüle</a><br><button onclick="deleteFile('${itemRef.name}', this)">Sil</button>`;
+        document.getElementById('fileList').appendChild(div);
+      }
+      updateUploadCount(result.items.length);
+    }
+
+    function updateUploadCount(count) {
+      const total = count ?? document.querySelectorAll('.file-item').length;
+      document.getElementById('uploadCount').innerText = `Toplam yüklenen dosya: ${total}`;
+    }
+  </script>
+</body>
+</html>
